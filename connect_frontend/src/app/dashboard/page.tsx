@@ -10,7 +10,7 @@ const DashboardPage = () => {
 
   useEffect(() => {
     // 認証状態をチェック
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('access_token');
     if (!token) {
       // トークンがない場合はログインページにリダイレクト
       router.push('/auth/login');
@@ -18,8 +18,9 @@ const DashboardPage = () => {
   }, [router]);
 
   const handleLogout = () => {
-    // トークンを削除
-    localStorage.removeItem('token');
+    // トークンとユーザー情報を削除
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
     // ログインページにリダイレクト
     router.push('/auth/login');
   };

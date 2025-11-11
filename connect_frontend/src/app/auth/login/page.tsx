@@ -58,21 +58,20 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-gray-50 dark:bg-zinc-900">
-      <div className="flex flex-1 flex-col justify-center px-4 py-8 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="flex flex-col items-center">
-            <Link href="/" className="flex items-center">
-              <span className="text-3xl font-bold text-gray-900 dark:text-white">Kobe Connect</span>
-            </Link>
-          </div>
-          <h2 className="mt-8 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-white">
-            アカウントにログイン
-          </h2>
+    <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-zinc-900">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="flex flex-col items-center">
+          <Link href="/" className="flex items-center">
+            <span className="text-3xl font-bold text-gray-900 dark:text-white">Kobe Connect</span>
+          </Link>
         </div>
+        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-white">
+          アカウントにログイン
+        </h2>
+      </div>
 
-        <div className="mx-auto mt-12 w-full max-w-[480px]">
-          <div className="bg-white p-6 shadow dark:bg-zinc-800 sm:rounded-lg">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white px-6 py-8 shadow sm:rounded-lg sm:px-10 dark:bg-zinc-800">
             {error && (
               <div className="mb-4 rounded-md bg-red-50 p-4 dark:bg-red-900/20">
                 <div className="flex">
@@ -105,16 +104,9 @@ const LoginPage = () => {
               </div>
 
               <div>
-                <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">
-                    パスワード
-                  </label>
-                  <div className="text-sm">
-                    <Link href="/auth/forgot-password" className="font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-                      パスワードをお忘れですか？
-                    </Link>
-                  </div>
-                </div>
+                <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">
+                  パスワード
+                </label>
                 <div className="mt-2">
                   <input
                     id="password"
@@ -129,20 +121,12 @@ const LoginPage = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-zinc-700"
-                  />
-                  <label htmlFor="remember-me" className="ml-3 block text-sm leading-6 text-gray-900 dark:text-gray-200">
-                    ログイン状態を保持する
-                  </label>
-                </div>
+              <div className="mb-2 -mt-1">
+                <Link href="/auth/forgot-password" className="text-xs text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+                  パスワードをお忘れですか？
+                </Link>
               </div>
-
+              
               <div>
                 <button
                   type="submit"
@@ -164,7 +148,6 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

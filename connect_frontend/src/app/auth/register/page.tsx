@@ -58,7 +58,7 @@ const RegisterPage = () => {
 
       console.log('Sending registration data:', registrationData);
 
-      // Send the registration request directly without CSRF token
+      // Send the registration request
       const response = await fetch('http://localhost:8000/api/register', {
         method: 'POST',
         headers: {
@@ -91,56 +91,12 @@ const RegisterPage = () => {
       }
 
       // 登録成功時の処理
-      console.log('Registration successful, attempting auto-login...');
+      console.log('Registration successful, redirecting to login...');
       
-      try {
-        // 自動ログイン
-        const loginResponse = await fetch('http://localhost:8000/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: formData.email.trim(),
-          password: formData.password,
-        })
-      });
-
-        const loginData = await loginResponse.json();
-        console.log('Login response:', loginData);
-
-        if (!loginResponse.ok) {
-          if (loginData.errors) {
-            const errorMessages = Object.values(loginData.errors).flat();
-            throw new Error(errorMessages.join('\n'));
-          }
-          throw new Error(loginData.message || 'ログインに失敗しました');
-        }
-
-        // トークンとユーザー情報をローカルストレージに保存
-        if (loginData.access_token) {
-          console.log('Login successful, saving token and user data');
-          localStorage.setItem('access_token', loginData.access_token);
-          localStorage.setItem('user', JSON.stringify(loginData.user || {
-            email: formData.email.trim(),
-            id: loginData.user?.id || 'unknown'
-          }));
-          
-          // ダッシュボードにリダイレクト
-          console.log('Redirecting to dashboard...');
-          window.location.href = '/dashboard'; // ページ全体をリロードして状態を確実に更新
-        } else {
-          console.error('No access token in login response');
-          setError('ログインに失敗しました。再度ログインしてください。');
-          router.push('/auth/login');
-        }
-      } catch (loginError) {
-        console.error('Auto-login error:', loginError);
-        // 登録は成功しているので、ログインページにリダイレクト
-        router.push('/auth/login');
-      }
+      // 登録成功メッセージを表示してログインページにリダイレクト
+      alert('登録が完了しました。ログインページに移動します。');
+      router.push('/auth/login');
+      
     } catch (err: any) {
       console.error('Registration error:', err);
       setError(err.message || '登録中にエラーが発生しました');
@@ -150,32 +106,31 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-gray-50 dark:bg-zinc-900">
-      <div className="flex flex-1 flex-col justify-center px-4 py-8 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="flex flex-col items-center">
-            <Link href="/" className="flex items-center">
-              <span className="text-3xl font-bold text-gray-900 dark:text-white">Kobe Connect</span>
-            </Link>
-          </div>
-          <h2 className="mt-8 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-white">
-            新規アカウントを作成
-          </h2>
+    <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-zinc-900">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="flex flex-col items-center">
+          <Link href="/" className="flex items-center">
+            <span className="text-3xl font-bold text-gray-900 dark:text-white">Kobe Connect</span>
+          </Link>
         </div>
+        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-white">
+          新規アカウントを作成
+        </h2>
+      </div>
 
-        <div className="mx-auto mt-12 w-full max-w-[480px]">
-          <div className="bg-white p-6 shadow dark:bg-zinc-800 sm:rounded-lg">
-            {error && (
-              <div className="mb-4 rounded-md bg-red-50 p-4 dark:bg-red-900/20">
-                <div className="flex">
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                      {error}
-                    </h3>
-                  </div>
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white px-6 py-8 shadow sm:rounded-lg sm:px-10 dark:bg-zinc-800">
+          {error && (
+            <div className="mb-4 rounded-md bg-red-50 p-4 dark:bg-red-900/20">
+              <div className="flex">
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                    {error}
+                  </h3>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
@@ -218,30 +173,6 @@ const RegisterPage = () => {
                 </p>
               </div>
 
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="terms"
-                    name="terms"
-                    type="checkbox"
-                    required
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-zinc-700"
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="terms" className="font-medium text-gray-700 dark:text-gray-300">
-                    <Link href="/terms" className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-                      利用規約
-                    </Link>
-                    と
-                    <Link href="/privacy" className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-                      プライバシーポリシー
-                    </Link>
-                    に同意します
-                  </label>
-                </div>
-              </div>
-
               <div>
                 <button
                   type="submit"
@@ -264,7 +195,6 @@ const RegisterPage = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
