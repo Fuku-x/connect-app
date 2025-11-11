@@ -31,16 +31,8 @@ const DashboardPage = () => {
         <div className="mx-auto w-full px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Link href="/" className="flex items-center">
-                <Image
-                  src="/next.svg"
-                  alt="Kobe Connect"
-                  width={100}
-                  height={24}
-                  className="dark:invert"
-                  priority
-                />
-                <span className="ml-2 text-xl font-semibold text-gray-900 dark:text-white">Kobe Connect</span>
+              <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
+                Kobe Connect
               </Link>
             </div>
             <div className="flex items-center">
