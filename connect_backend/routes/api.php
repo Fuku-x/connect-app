@@ -20,21 +20,19 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 
 // 認証不要なルート
 Route::post('/register', [RegisterController::class, 'register']);
-
-// 認証が必要なルート
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-
-    // ログアウト
-    Route::post('/logout', [LoginController::class, 'logout']);
-});
-
-// 認証不要なルート
-Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/login', [LoginController::class, 'login']);
 
 // パスワードリセット
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
+
+// 認証が必要なルート
+Route::middleware('auth:api')->group(function () {
+    // ユーザー情報の取得
+    Route::get('/user', function (Request $request) {
+        return response()->json($request->user());
+    });
+
+    // ログアウト
+    Route::post('/logout', [LoginController::class, 'logout']);
+});

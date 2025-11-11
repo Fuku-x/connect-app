@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LoginController extends Controller
 {
@@ -19,24 +22,30 @@ class LoginController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->validated();
+        $credentials = $request->only('email', 'password');
 
-        if (!Auth::attempt($credentials)) {
-            throw ValidationException::withMessages([
-                'email' => ['認証に失敗しました。メールアドレスまたはパスワードが正しくありません。'],
-            ]);
+        try {
+            if (! $token = JWTAuth::attempt($credentials)) {
+                return response()->json([
+                    'message' => '認証に失敗しました。メールアドレスまたはパスワードが正しくありません。',
+                ], 401);
+            }
+        } catch (JWTException $e) {
+            return response()->json([
+                'message' => 'トークンの作成に失敗しました。',
+            ], 500);
         }
 
-        $user = $request->user();
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $user = Auth::user();
 
         return response()->json([
             'access_token' => $token,
-            'token_type' => 'Bearer',
+            'token_type' => 'bearer',
+            'expires_in' => config('jwt.ttl') * 60, // in seconds
             'user' => [
                 'id' => $user->id,
+                'name' => $user->name,
                 'email' => $user->email,
-                'name' => $user->name ?? null,
             ]
         ]);
     }
@@ -48,6 +57,12 @@ class LoginController extends Controller
      */
     public function logout(): JsonResponse
     {
+        try {
+            auth('api')->logout();
+            return response()->json(['message' => 'ログアウトしました。']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'ログアウトに失敗しました。'], 500);
+        }
         Auth::user()->currentAccessToken()->delete();
 
         return response()->json([
