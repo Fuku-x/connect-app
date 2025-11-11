@@ -1,79 +1,92 @@
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
+// Dynamically import components with no SSR
+const Header = dynamic(() => import('@/components/Header/Header'), { ssr: false });
+const HeroSection = dynamic(() => import('@/components/HeroSection/HeroSection'), { ssr: false });
+const Footer = dynamic(() => import('@/components/Footer/Footer'), { ssr: false });
 
 /**
  * ホームページコンポーネント
  */
 const Home: React.FC = () => {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between bg-white py-32 px-4 dark:bg-black sm:items-start sm:px-8 md:px-16">
-        <div className="flex flex-col items-center gap-12">
-          <div className="relative h-8 w-48">
-            <Image
-              src="/next.svg"
-              alt="Next.js Logo"
-              className="dark:invert"
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              priority
-            />
-          </div>
-          
-          <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-            <h1 className="text-3xl font-semibold leading-tight tracking-tight text-black dark:text-zinc-50 sm:text-4xl">
-              Welcome to Connect App
-            </h1>
-            <p className="max-w-md text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Connect App は、Next.js と TypeScript を活用したモダンな Web アプリケーションです。
-              開発を始めるには、
-              <Link 
-                href="/docs/getting-started" 
-                className="font-medium text-blue-600 hover:underline dark:text-blue-400"
-              >
-                スタートガイド
-              </Link>を確認してください。
-            </p>
-          </div>
+  const router = useRouter();
 
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-            <Link
-              href="/dashboard"
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-700 dark:hover:bg-blue-600 sm:w-auto"
-            >
-              ダッシュボードへ進む
-            </Link>
-            
-            <a
-              href="https://github.com/Fuku-x/connect-app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-6 font-medium text-zinc-900 transition-colors hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700 sm:w-auto"
-            >
-              <svg
-                className="h-5 w-5"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.699 1.028 1.595 1.028 2.688 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              GitHub で見る
-            </a>
-          </div>
-        </div>
+  useEffect(() => {
+    // 認証状態をチェック（JWTトークンの有無など）
+    const token = localStorage.getItem('token');
+    if (token) {
+      // トークンがある場合はダッシュボードにリダイレクト
+      router.push('/dashboard');
+    }
+  }, [router]);
+
+  return (
+    <div className="flex min-h-screen flex-col bg-white dark:bg-black">
+      <Header />
+      <main className="flex-1">
+        <HeroSection />
         
-        <footer className="mt-16 w-full border-t border-zinc-200 pt-8 dark:border-zinc-800">
-          <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
-            {new Date().getFullYear()} Connect App. All rights reserved.
-          </p>
-        </footer>
+        {/* 特徴セクション */}
+        <section id="features" className="bg-gray-50 py-16 dark:bg-zinc-900 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                Connect App の特徴
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-500 dark:text-gray-400">
+                シンプルで使いやすいインターフェースで、チームの生産性を向上させます。
+              </p>
+            </div>
+
+            <div className="mt-16">
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  {
+                    name: 'リアルタイムチャット',
+                    description: 'チームメンバーとリアルタイムでコミュニケーションが取れます。',
+                    icon: (
+                      <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    name: 'タスク管理',
+                    description: 'プロジェクトのタスクを効率的に管理し、進捗を可視化します。',
+                    icon: (
+                      <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    name: 'ファイル共有',
+                    description: '必要なファイルをチームメンバーと簡単に共有できます。',
+                    icon: (
+                      <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                    ),
+                  },
+                ].map((feature, index) => (
+                  <div key={index} className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:bg-zinc-800">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30">
+                      {feature.icon}
+                    </div>
+                    <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">{feature.name}</h3>
+                    <p className="mt-2 text-gray-600 dark:text-gray-400">{feature.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
+      <Footer />
     </div>
   );
 };
