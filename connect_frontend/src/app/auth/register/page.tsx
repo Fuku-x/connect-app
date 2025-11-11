@@ -25,37 +25,126 @@ const RegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    console.log('Form submitted');
 
-    // バリデーション
-    if (!formData.email.endsWith('@st.kobedenshi.ac.jp')) {
-      setError('神戸電子のメールアドレス(@st.kobedenshi.ac.jp)を使用してください');
+    // メールアドレスのバリデーション
+    const emailRegex = /^[^\s@]+@st\.kobedenshi\.ac\.jp$/;
+    if (!emailRegex.test(formData.email)) {
+      const errorMsg = '有効な神戸電子のメールアドレス(@st.kobedenshi.ac.jp)を入力してください';
+      console.error('Validation error:', errorMsg);
+      setError(errorMsg);
+      return;
+    }
+
+    // パスワードの最小文字数チェック
+    if (formData.password.length < 8) {
+      const errorMsg = 'パスワードは8文字以上で入力してください';
+      console.error('Validation error:', errorMsg);
+      setError(errorMsg);
       return;
     }
 
     setIsLoading(true);
+    console.log('Sending registration request...');
 
     try {
+      // Prepare registration data
+      const registrationData = {
+        name: formData.email.split('@')[0],
+        email: formData.email.trim(),
+        password: formData.password,
+        password_confirmation: formData.password,
+      };
+
+      console.log('Sending registration data:', registrationData);
+
+      // Send the registration request directly without CSRF token
       const response = await fetch('http://localhost:8000/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
         },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+        credentials: 'include',
+        mode: 'cors',
+        body: JSON.stringify(registrationData),
       });
 
-      const data = await response.json();
+      console.log('Registration response status:', response.status);
+
+      const responseData = await response.json().catch(e => {
+        console.error('Failed to parse JSON response:', e);
+        return { message: 'Invalid server response' };
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response data:', responseData);
 
       if (!response.ok) {
-        throw new Error(data.message || '登録に失敗しました');
+        // バリデーションエラーメッセージを処理
+        if (responseData.errors) {
+          const errorMessages = Object.values(responseData.errors).flat();
+          throw new Error(errorMessages.join('\n'));
+        }
+        throw new Error(responseData.message || `登録に失敗しました (${response.status})`);
       }
 
-      // 登録成功時にログインページにリダイレクト
-      router.push('/auth/login?registered=true');
+      // 登録成功時の処理
+      console.log('Registration successful, attempting auto-login...');
+      
+      try {
+        // 自動ログイン
+        const loginResponse = await fetch('http://localhost:8000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          password: formData.password,
+        })
+      });
+
+        const loginData = await loginResponse.json();
+        console.log('Login response:', loginData);
+
+        if (!loginResponse.ok) {
+          if (loginData.errors) {
+            const errorMessages = Object.values(loginData.errors).flat();
+            throw new Error(errorMessages.join('\n'));
+          }
+          throw new Error(loginData.message || 'ログインに失敗しました');
+        }
+
+        // トークンとユーザー情報をローカルストレージに保存
+        if (loginData.access_token) {
+          console.log('Login successful, saving token and user data');
+          localStorage.setItem('access_token', loginData.access_token);
+          localStorage.setItem('user', JSON.stringify(loginData.user || {
+            email: formData.email.trim(),
+            id: loginData.user?.id || 'unknown'
+          }));
+          
+          // ダッシュボードにリダイレクト
+          console.log('Redirecting to dashboard...');
+          window.location.href = '/dashboard'; // ページ全体をリロードして状態を確実に更新
+        } else {
+          console.error('No access token in login response');
+          setError('ログインに失敗しました。再度ログインしてください。');
+          router.push('/auth/login');
+        }
+      } catch (loginError) {
+        console.error('Auto-login error:', loginError);
+        // 登録は成功しているので、ログインページにリダイレクト
+        router.push('/auth/login');
+      }
     } catch (err: any) {
+      console.error('Registration error:', err);
       setError(err.message || '登録中にエラーが発生しました');
+    } finally {
       setIsLoading(false);
     }
   };

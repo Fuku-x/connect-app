@@ -15,15 +15,25 @@ const LoginPage = () => {
     e.preventDefault();
     setError('');
 
+    // メールアドレスのバリデーション
+    const emailRegex = /^[^\s@]+@st\.kobedenshi\.ac\.jp$/;
+    if (!emailRegex.test(email)) {
+      setError('有効な神戸電子のメールアドレス(@st.kobedenshi.ac.jp)を入力してください');
+      return;
+    }
+
     try {
-      // ここで実際のAPIエンドポイントにリクエストを送信
+      // ログインAPIエンドポイントにリクエストを送信
       const response = await fetch('http://localhost:8000/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include', // Cookieを使用する場合
+        body: JSON.stringify({ 
+          email: email.trim(),
+          password: password
+        }),
       });
 
       const data = await response.json();
@@ -32,14 +42,17 @@ const LoginPage = () => {
         throw new Error(data.message || 'ログインに失敗しました');
       }
 
-      // トークンをローカルストレージに保存（セキュリティの観点からはHttpOnly Cookieの使用を推奨）
-      if (data.token) {
-        localStorage.setItem('token', data.token);
+      // トークンをローカルストレージに保存
+      if (data.access_token) {
+        localStorage.setItem('access_token', data.access_token);
+        // ユーザー情報を保存
+        localStorage.setItem('user', JSON.stringify(data.user));
       }
 
       // ダッシュボードにリダイレクト
       router.push('/dashboard');
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err.message || 'ログイン中にエラーが発生しました');
     }
   };
