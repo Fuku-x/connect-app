@@ -66,29 +66,15 @@ const RegisterPage = () => {
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="flex flex-col items-center">
             <Link href="/" className="flex items-center">
-              <Image
-                src="/next.svg"
-                alt="Kobe Connect"
-                width={120}
-                height={32}
-                className="dark:invert"
-                priority
-              />
-              <span className="ml-2 text-2xl font-bold text-gray-900 dark:text-white">Kobe Connect</span>
+              <span className="text-3xl font-bold text-gray-900 dark:text-white">Kobe Connect</span>
             </Link>
           </div>
-          <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-white">
+          <h2 className="mt-8 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-white">
             新規アカウントを作成
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            既にアカウントをお持ちですか？{' '}
-            <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-              ログインする
-            </Link>
-          </p>
         </div>
 
-        <div className="mx-auto w-full max-w-[480px]">
+        <div className="mx-auto mt-12 w-full max-w-[480px]">
           <div className="bg-white p-6 shadow dark:bg-zinc-800 sm:rounded-lg">
             {error && (
               <div className="mb-4 rounded-md bg-red-50 p-4 dark:bg-red-900/20">
