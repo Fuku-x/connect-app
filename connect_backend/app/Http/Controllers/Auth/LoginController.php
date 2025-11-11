@@ -63,10 +63,5 @@ class LoginController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'ログアウトに失敗しました。'], 500);
         }
-        Auth::user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'ログアウトしました。',
-        ]);
     }
 }
