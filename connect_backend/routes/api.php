@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Response;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -27,12 +29,17 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink
 Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
 
 // 認証が必要なルート
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'throttle:60,1'])->group(function () {
     // ユーザー情報の取得
-    Route::get('/user', function (Request $request) {
-        return response()->json($request->user());
-    });
+    Route::get('/user', [UserController::class, 'show']);
 
     // ログアウト
     Route::post('/logout', [LoginController::class, 'logout']);
+});
+
+// 存在しないルート用のハンドラー
+Route::fallback(function () {
+    return response()->json([
+        'message' => 'Not Found',
+    ], Response::HTTP_NOT_FOUND);
 });
