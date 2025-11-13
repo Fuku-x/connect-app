@@ -20,13 +20,24 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 |
 */
 
-// 認証不要なルート
-Route::post('/register', [RegisterController::class, 'register']);
-Route::post('/login', [LoginController::class, 'login']);
+// CORS middleware for all API routes
+Route::group(['middleware' => ['cors']], function() {
+    // 認証不要なルート
+    Route::post('/register', [RegisterController::class, 'register']);
+    Route::post('/login', [LoginController::class, 'login']);
 
-// パスワードリセット
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail']);
-Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
+    // パスワードリセット
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail']);
+    Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
+    
+    // Add OPTIONS method support for all routes
+    Route::options('/{any}', function() {
+        return response()->json([], 200)
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    })->where('any', '.*');
+});
 
 // 認証が必要なルート
 Route::middleware(['auth:api', 'throttle:60,1'])->group(function () {

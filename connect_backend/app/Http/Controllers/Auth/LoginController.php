@@ -4,12 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Tymon\JWTAuth\Exceptions\JWTException;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LoginController extends Controller
 {
@@ -22,31 +21,30 @@ class LoginController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->only('email', 'password');
+        $request->authenticate();
 
-        try {
-            if (! $token = JWTAuth::attempt($credentials)) {
-                return response()->json([
-                    'message' => '認証に失敗しました。メールアドレスまたはパスワードが正しくありません。',
-                ], 401);
-            }
-        } catch (JWTException $e) {
-            return response()->json([
-                'message' => 'トークンの作成に失敗しました。',
-            ], 500);
+        $user = User::where('email', $request->email)->first();
+        
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['提供された認証情報が正しくありません。'],
+            ]);
         }
 
-        $user = Auth::user();
+        // 既存のトークンを削除
+        $user->tokens()->delete();
+        
+        // 新しいトークンを作成
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => config('jwt.ttl') * 60, // in seconds
             'user' => [
                 'id' => $user->id,
-                'name' => $user->name,
                 'email' => $user->email,
-            ]
+                'created_at' => $user->created_at,
+            ],
+            'access_token' => $token,
+            'token_type' => 'Bearer',
         ]);
     }
 
