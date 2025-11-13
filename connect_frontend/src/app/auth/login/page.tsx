@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import { setAuthToken, getAuthToken } from '@/lib/auth';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -36,17 +36,40 @@ const LoginPage = () => {
         }),
       });
 
-      const data = await response.json();
+      // レスポンスの内容を確認
+      const responseText = await response.text();
+      let data;
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch (e) {
+        console.error('Failed to parse response:', responseText);
+        throw new Error('サーバーからの応答の解析に失敗しました');
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'ログインに失敗しました');
       }
 
-      // トークンをローカルストレージに保存
-      if (data.access_token) {
-        localStorage.setItem('access_token', data.access_token);
-        // ユーザー情報を保存
+      // トークンを保存
+      if (!data.access_token) {
+        throw new Error('トークンが含まれていません');
+      }
+      
+      // トークンを保存（ユーティリティ関数を使用）
+      setAuthToken(data.access_token);
+      
+      // ユーザー情報を保存
+      if (data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
+      console.log('Login successful, user:', data.user);
+      console.log('JWT Token:', data.access_token);
+      
+      // トークンの検証
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error('トークンの保存に失敗しました');
       }
 
       // ダッシュボードにリダイレクト

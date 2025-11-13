@@ -4,19 +4,48 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class Cors
 {
-    public function handle(Request $request, Closure $next)
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
     {
-        $response = $next($request);
+        $allowedOrigins = ['http://localhost:3000'];
+        $origin = $request->header('Origin');
+        
+        // For development, you might want to allow all origins
+        if (in_array($origin, $allowedOrigins) || config('app.env') === 'local') {
+            $headers = [
+                'Access-Control-Allow-Origin'      => $origin ?: '*',
+                'Access-Control-Allow-Methods'     => 'POST, GET, OPTIONS, PUT, DELETE, PATCH',
+                'Access-Control-Allow-Credentials' => 'true',
+                'Access-Control-Max-Age'           => '86400',
+                'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN, X-XSRF-TOKEN, X-Socket-Id, Accept, X-Auth-Token, X-API-Key'
+            ];
 
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN');
-        $response->headers->set('Access-Control-Allow-Credentials', 'true');
-        $response->headers->set('Access-Control-Max-Age', '86400');
+            // Handle preflight OPTIONS request
+            if ($request->isMethod('OPTIONS')) {
+                return response()->json([], 200, $headers);
+            }
 
-        return $response;
+            // Handle the actual request
+            $response = $next($request);
+            
+            // Add CORS headers to the response
+            foreach($headers as $key => $value) {
+                $response->headers->set($key, $value);
+            }
+
+            return $response;
+        }
+
+        return $next($request);
     }
 }
