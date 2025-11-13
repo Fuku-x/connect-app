@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { setAuthToken, getAuthToken } from '@/lib/auth';
+import Header from '@/components/Header/Header';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -81,20 +82,18 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-zinc-900">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex flex-col items-center">
-          <Link href="/" className="flex items-center">
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">Kobe Connect</span>
-          </Link>
-        </div>
-        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-white">
-          アカウントにログイン
-        </h2>
-      </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white px-6 py-8 shadow sm:rounded-lg sm:px-10 dark:bg-zinc-800">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-900">
+      <Header />
+      <div className="flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Kobe Connect</h1>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              アカウントにログイン
+            </h2>
+          </div>
+          
+          <div className="bg-white px-6 py-8 shadow sm:rounded-lg sm:px-10 dark:bg-zinc-800">
             {error && (
               <div className="mb-4 rounded-md bg-red-50 p-4 dark:bg-red-900/20">
                 <div className="flex">
@@ -171,6 +170,7 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
+    </div>
   );
 };
 
