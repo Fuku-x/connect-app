@@ -23,29 +23,19 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
             'email' => [
                 'required',
                 'string',
                 'email:rfc,dns',
                 'max:255',
                 'unique:users,email',
+                'regex:/^[^@]+@st\.kobedenshi\.ac\.jp$/i',
             ],
             'password' => [
                 'required',
                 'string',
                 'min:8',
-                'confirmed',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).+$/',
-            ],
-            'password_confirmation' => [
-                'required',
-                'string',
-                'min:8',
+                'regex:/^[a-zA-Z0-9]+$/',
             ],
         ];
     }
@@ -61,11 +51,11 @@ class RegisterRequest extends FormRequest
             'email.required' => 'メールアドレスは必須です。',
             'email.email' => '有効なメールアドレスを入力してください。',
             'email.unique' => 'このメールアドレスは既に登録されています。',
+            'email.regex' => '神戸電子のメールアドレス(@st.kobedenshi.ac.jp)を使用してください',
             'password.required' => 'パスワードは必須です。',
             'password.min' => 'パスワードは8文字以上で入力してください。',
             'password.confirmed' => 'パスワードが確認用と一致しません。',
-            'password.regex' => 'パスワードは大文字、小文字、数字、記号を含む必要があります。',
-            'password_confirmation.required' => 'パスワード（確認）は必須です。',
+            'password.regex' => 'パスワードは半角英数字で入力してください',
         ];
     }
 }

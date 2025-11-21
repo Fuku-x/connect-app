@@ -39,4 +39,17 @@ class Controller extends BaseController
             'errors' => $errors
         ], $code);
     }
+
+    /**
+     * Backwards compatible helpers (sendResponse/sendError)
+     */
+    protected function sendResponse($data = null, string $message = '', int $code = 200)
+    {
+        return $this->success($data, $message, $code);
+    }
+
+    protected function sendError(string $message, array $errors = [], int $code = 400)
+    {
+        return $this->error($message, $errors, $code);
+    }
 }
