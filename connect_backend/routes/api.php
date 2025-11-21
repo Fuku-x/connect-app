@@ -46,6 +46,22 @@ Route::middleware(['auth:api'])->group(function () {
     // ユーザー情報の取得
     Route::get('/user', [UserController::class, 'show']);
 
+    // ポートフォリオ関連
+    Route::prefix('portfolio')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\PortfolioController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\PortfolioController::class, 'show']);
+        Route::post('/', [\App\Http\Controllers\Api\PortfolioController::class, 'store']);
+    });
+
+    // メンバー募集関連
+    Route::prefix('recruitments')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\RecruitmentController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\RecruitmentController::class, 'show']);
+        Route::post('/', [\App\Http\Controllers\Api\RecruitmentController::class, 'store']);
+        Route::put('/{id}', [\App\Http\Controllers\Api\RecruitmentController::class, 'update']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\RecruitmentController::class, 'destroy']);
+    });
+
     // プロフィール関連
     Route::prefix('profile')->group(function () {
         Route::get('/', [ProfileController::class, 'show']);

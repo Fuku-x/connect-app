@@ -66,7 +66,7 @@ const DashboardPage = () => {
         setLoading(true);
         // プロジェクトと募集情報を並行して取得
         const [projectsRes, recruitmentsRes] = await Promise.all([
-          api.get('/api/portfolio'),
+          api.get('/portfolio'),
           api.get('/api/recruitments')
         ]);
         
