@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LoginController extends Controller
@@ -24,29 +24,29 @@ class LoginController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        try {
-            if (! $token = JWTAuth::attempt($credentials)) {
-                return response()->json([
-                    'message' => '認証に失敗しました。メールアドレスまたはパスワードが正しくありません。',
-                ], 401);
-            }
-        } catch (JWTException $e) {
-            return response()->json([
-                'message' => 'トークンの作成に失敗しました。',
-            ], 500);
+        if (! $token = auth('api')->attempt($credentials)) {
+            throw ValidationException::withMessages([
+                'email' => ['提供された認証情報が正しくありません。'],
+            ]);
         }
 
-        $user = Auth::user();
+        $user = auth('api')->user();
 
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => config('jwt.ttl') * 60, // in seconds
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-            ]
+                'student_id' => $user->student_id,
+                'department' => $user->department,
+                'grade' => $user->grade,
+                'bio' => $user->bio,
+                'profile_image' => $user->profile_image,
+                'created_at' => $user->created_at,
+            ],
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60
         ]);
     }
 
@@ -63,5 +63,40 @@ class LoginController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'ログアウトに失敗しました。'], 500);
         }
+    }
+    
+    /**
+     * ログインユーザーの情報を取得
+     *
+     * @return JsonResponse
+     */
+    public function me(): JsonResponse
+    {
+        return response()->json(auth('api')->user());
+    }
+    
+    /**
+     * トークンをリフレッシュ
+     *
+     * @return JsonResponse
+     */
+    public function refresh(): JsonResponse
+    {
+        return $this->respondWithToken(auth('api')->refresh());
+    }
+    
+    /**
+     * トークン付きレスポンスを生成
+     *
+     * @param  string $token
+     * @return JsonResponse
+     */
+    protected function respondWithToken($token): JsonResponse
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60
+        ]);
     }
 }

@@ -20,17 +20,27 @@ class RegisterController extends Controller
     {
         $validated = $request->validated();
         
+        // メールアドレスからユーザー名を生成 (例: example@st.kobedenshi.ac.jp -> example)
+        $username = explode('@', $validated['email'])[0];
+        
         $user = User::create([
-            'name' => $validated['name'],
+            'name' => $username, // メールアドレスの@より前の部分をユーザー名として使用
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'email_verified_at' => null, // Explicitly set to null
         ]);
 
+        // トークンを生成
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'created_at' => $user->created_at,
+            'user' => [
+                'id' => $user->id,
+                'email' => $user->email,
+                'created_at' => $user->created_at,
+            ],
+            'access_token' => $token,
+            'token_type' => 'Bearer',
         ], 201);
     }
 }
