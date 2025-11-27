@@ -30,17 +30,19 @@ class RegisterController extends Controller
             'email_verified_at' => null, // Explicitly set to null
         ]);
 
-        // トークンを生成
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // JWTトークンを生成
+        $token = auth('api')->login($user);
 
         return response()->json([
             'user' => [
                 'id' => $user->id,
+                'name' => $user->name,
                 'email' => $user->email,
                 'created_at' => $user->created_at,
             ],
             'access_token' => $token,
-            'token_type' => 'Bearer',
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60
         ], 201);
     }
 }

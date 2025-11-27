@@ -38,7 +38,7 @@ export default function RecruitmentsPage() {
 
   const fetchRecruitments = async () => {
     try {
-      const response = await api.get('/api/recruitments');
+      const response = await api.get('/recruitments');
       setRecruitments(response.data);
     } catch (error) {
       console.error('Failed to fetch recruitments:', error);
@@ -59,7 +59,7 @@ export default function RecruitmentsPage() {
 
   const handleSubmit = async (values: any) => {
     try {
-      await api.post('/api/recruitments', {
+      await api.post('/recruitments', {
         ...values,
         required_skills: values.required_skills ? values.required_skills.split(',').map((s: string) => s.trim()) : []
       });

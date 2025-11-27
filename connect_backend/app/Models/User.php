@@ -68,4 +68,9 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail, CanRe
     {
         return [];
     }
+
+    public function portfolios()
+    {
+        return $this->hasMany(Portfolio::class);
+    }
 }

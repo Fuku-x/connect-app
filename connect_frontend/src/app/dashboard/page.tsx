@@ -67,7 +67,7 @@ const DashboardPage = () => {
         // プロジェクトと募集情報を並行して取得
         const [projectsRes, recruitmentsRes] = await Promise.all([
           api.get('/portfolio'),
-          api.get('/api/recruitments')
+          api.get('/recruitments')
         ]);
         
         if (projectsRes.data) {
@@ -96,7 +96,7 @@ const DashboardPage = () => {
 
   const handleLogout = async () => {
     try {
-      await api.post('/api/logout');
+      await api.post('/logout');
     } catch (error) {
       console.error('ログアウト中にエラーが発生しました:', error);
     } finally {

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Routing\Controller;
 
-class Controller extends BaseController
+class BaseController extends Controller
 {
     /**
      * 成功レスポンスを返す
