@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
 // Dynamically import components with no SSR
@@ -50,15 +48,6 @@ const features = [
  * ホームページコンポーネント
  */
 const Home: React.FC = () => {
-  const router = useRouter();
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      router.push('/dashboard');
-    }
-  }, [router]);
-
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-black">
       <Header />

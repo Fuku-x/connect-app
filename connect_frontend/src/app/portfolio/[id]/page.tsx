@@ -21,6 +21,7 @@ import {
   GithubOutlined,
   LinkOutlined,
   PictureOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
 import api from '@/lib/api';
 import { PortfolioProject, PortfolioRecord } from '@/types/portfolio';
@@ -161,9 +162,33 @@ export default function PortfolioDetailPage() {
               <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()}>
                 戻る
               </Button>
-              {portfolio.github_url && (
+              {portfolio.user?.id && (
                 <Button
                   type="primary"
+                  icon={<MessageOutlined />}
+                  onClick={async () => {
+                    try {
+                      const response = await api.post('/messages/start', {
+                        user_id: portfolio.user?.id,
+                      });
+                      const data = response.data?.data || response.data;
+                      router.push(`/messages/${data.conversation_id}`);
+                    } catch (error: any) {
+                      console.error('Failed to start conversation:', error);
+                      if (error.response?.status === 401) {
+                        message.info('ログインが必要です');
+                        router.push('/auth/login');
+                      } else {
+                        message.error('会話の開始に失敗しました');
+                      }
+                    }
+                  }}
+                >
+                  {portfolio.user?.name}にメッセージを送る
+                </Button>
+              )}
+              {portfolio.github_url && (
+                <Button
                   icon={<GithubOutlined />}
                   href={portfolio.github_url}
                   target="_blank"

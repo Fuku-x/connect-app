@@ -13,7 +13,8 @@ import {
   Typography,
   message,
 } from 'antd';
-import { GlobalOutlined, SearchOutlined } from '@ant-design/icons';
+import { GlobalOutlined, SearchOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
 import api from '@/lib/api';
 import { PortfolioRecord } from '@/types/portfolio';
 
@@ -95,6 +96,15 @@ export default function PublicPortfoliosPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
+      {/* ダッシュボードに戻るボタン */}
+      <div className="mb-6">
+        <Link href="/dashboard">
+          <Button icon={<ArrowLeftOutlined />} type="text">
+            ダッシュボードに戻る
+          </Button>
+        </Link>
+      </div>
+
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-8">
         <div>
           <Title level={2} className="!mb-2">

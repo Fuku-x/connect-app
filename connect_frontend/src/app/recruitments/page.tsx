@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card, List, Tag, Input, Modal, Form, message, Space, Divider } from 'antd';
-import { PlusOutlined, SearchOutlined, ClockCircleOutlined, DollarOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, ClockCircleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import Link from 'next/link';
 import api from '@/lib/api';
 
-const { Search } = Input;
 const { TextArea } = Input;
 
 interface Recruitment {
@@ -15,7 +15,6 @@ interface Recruitment {
   description: string;
   required_skills: string[];
   project_duration: string;
-  compensation: string;
   status: 'open' | 'closed';
   user: {
     id: number;
@@ -39,10 +38,12 @@ export default function RecruitmentsPage() {
   const fetchRecruitments = async () => {
     try {
       const response = await api.get('/recruitments');
-      setRecruitments(response.data);
+      // APIレスポンス形式に対応
+      const data = response.data?.data || response.data || [];
+      setRecruitments(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch recruitments:', error);
-      message.error('Failed to load recruitments');
+      message.error('募集の取得に失敗しました');
     } finally {
       setLoading(false);
     }
@@ -63,12 +64,12 @@ export default function RecruitmentsPage() {
         ...values,
         required_skills: values.required_skills ? values.required_skills.split(',').map((s: string) => s.trim()) : []
       });
-      message.success('Recruitment post created successfully');
+      message.success('募集を作成しました');
       setIsModalVisible(false);
       fetchRecruitments();
     } catch (error) {
       console.error('Failed to create recruitment post:', error);
-      message.error('Failed to create recruitment post');
+      message.error('募集の作成に失敗しました');
     }
   };
 
@@ -82,16 +83,28 @@ export default function RecruitmentsPage() {
 
   return (
     <div className="container mx-auto p-4">
+      {/* ダッシュボードに戻る */}
+      <div className="mb-4">
+        <Link href="/dashboard">
+          <Button 
+            icon={<ArrowLeftOutlined />} 
+            className="!text-blue-500 hover:!text-blue-600 hover:!bg-blue-50 dark:hover:!bg-blue-900/20"
+          >
+            ダッシュボードに戻る
+          </Button>
+        </Link>
+      </div>
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <h1 className="text-2xl font-bold mb-4 md:mb-0">Recruitment Board</h1>
+        <h1 className="text-2xl font-bold mb-4 md:mb-0">メンバー募集</h1>
         <div className="w-full md:w-1/3">
-          <Search
-            placeholder="Search by title, description, or skills"
-            allowClear
-            enterButton={<SearchOutlined />}
+          <Input
+            placeholder="タイトル、説明、スキルで検索"
+            prefix={<SearchOutlined className="text-gray-400" />}
             size="large"
-            onSearch={handleSearch}
+            value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
+            allowClear
           />
         </div>
         <Button 
@@ -100,7 +113,7 @@ export default function RecruitmentsPage() {
           className="mt-4 md:mt-0"
           onClick={handleCreatePost}
         >
-          Create Post
+          募集を作成
         </Button>
       </div>
 
@@ -142,12 +155,6 @@ export default function RecruitmentsPage() {
                   <ClockCircleOutlined className="mr-1" />
                   <span>{recruitment.project_duration}</span>
                 </div>
-                {recruitment.compensation && (
-                  <div className="flex items-center">
-                    <DollarOutlined className="mr-1" />
-                    <span>{recruitment.compensation}</span>
-                  </div>
-                )}
                 <div className="ml-auto">
                   <span className="text-gray-400">
                     Posted by {recruitment.user?.name || 'Anonymous'}
@@ -160,7 +167,7 @@ export default function RecruitmentsPage() {
       />
 
       <Modal
-        title="Create Recruitment Post"
+        title="メンバー募集を作成"
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
@@ -174,24 +181,24 @@ export default function RecruitmentsPage() {
         >
           <Form.Item
             name="title"
-            label="Title"
-            rules={[{ required: true, message: 'Please input the title!' }]}
+            label="タイトル"
+            rules={[{ required: true, message: 'タイトルを入力してください' }]}
           >
-            <Input placeholder="Looking for a React developer" />
+            <Input placeholder="例: Reactエンジニア募集" />
           </Form.Item>
 
           <Form.Item
             name="description"
-            label="Description"
-            rules={[{ required: true, message: 'Please input the description!' }]}
+            label="説明"
+            rules={[{ required: true, message: '説明を入力してください' }]}
           >
-            <TextArea rows={6} placeholder="Describe the position, requirements, and project details..." />
+            <TextArea rows={6} placeholder="ポジション、要件、プロジェクトの詳細を記載..." />
           </Form.Item>
 
           <Form.Item
             name="required_skills"
-            label="Required Skills (comma separated)"
-            rules={[{ required: true, message: 'Please input at least one skill!' }]}
+            label="必要スキル（カンマ区切り）"
+            rules={[{ required: true, message: 'スキルを入力してください' }]}
           >
             <Input placeholder="React, Node.js, TypeScript" />
           </Form.Item>
@@ -199,26 +206,20 @@ export default function RecruitmentsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Form.Item
               name="project_duration"
-              label="Project Duration"
-              rules={[{ required: true, message: 'Please input the project duration!' }]}
+              label="プロジェクト期間"
+              rules={[{ required: true, message: '期間を入力してください' }]}
             >
-              <Input placeholder="3 months" />
+              <Input placeholder="3ヶ月" />
             </Form.Item>
 
-            <Form.Item
-              name="compensation"
-              label="Compensation (Optional)"
-            >
-              <Input placeholder="$2000/month" />
-            </Form.Item>
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
             <Button onClick={() => setIsModalVisible(false)}>
-              Cancel
+              キャンセル
             </Button>
             <Button type="primary" htmlType="submit">
-              Post
+              投稿
             </Button>
           </div>
         </Form>

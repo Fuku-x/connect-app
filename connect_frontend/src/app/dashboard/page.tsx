@@ -9,7 +9,7 @@ import Card from 'antd/es/card';
 import Avatar from 'antd/es/avatar';
 import List from 'antd/es/list';
 import Tag from 'antd/es/tag';
-import { message } from 'antd';
+import { message, Badge } from 'antd';
 import { PlusOutlined, UserOutlined, TeamOutlined, FileTextOutlined, MessageOutlined, CheckCircleOutlined } from '@ant-design/icons';
 
 const { Meta } = Card;
@@ -36,11 +36,11 @@ const DashboardPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [recruitments, setRecruitments] = useState<Recruitment[]>([]);
   const [activeTab, setActiveTab] = useState('projects');
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) {
-      console.error('No access token found');
       router.push('/auth/login');
       return;
     }
@@ -49,13 +49,11 @@ const DashboardPage = () => {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       if (payload.exp * 1000 < Date.now()) {
-        console.error('Token expired');
         localStorage.removeItem('access_token');
         router.push('/auth/login');
         return;
       }
-    } catch (error) {
-      console.error('Invalid token format:', error);
+    } catch {
       localStorage.removeItem('access_token');
       router.push('/auth/login');
       return;
@@ -64,19 +62,36 @@ const DashboardPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // プロジェクトと募集情報を並行して取得
-        const [projectsRes, recruitmentsRes] = await Promise.all([
+        // プロジェクトと募集情報と未読メッセージ数を並行して取得
+        const [projectsRes, recruitmentsRes, unreadRes] = await Promise.all([
           api.get('/portfolio'),
-          api.get('/recruitments')
+          api.get('/recruitments'),
+          api.get('/messages/unread-count').catch(() => ({ data: { data: { count: 0 } } }))
         ]);
         
         if (projectsRes.data) {
-          setProjects(projectsRes.data.projects || []);
+          // ポートフォリオAPIのレスポンス形式に対応
+          const portfolioData = projectsRes.data?.data || projectsRes.data || [];
+          const portfolios = Array.isArray(portfolioData) ? portfolioData : [portfolioData];
+          // ポートフォリオをプロジェクト形式に変換
+          const projectList = portfolios.map((p: any) => ({
+            id: p.id,
+            name: p.title,
+            description: p.description || '',
+            skills: p.skills || [],
+          }));
+          setProjects(projectList);
         }
         
         if (recruitmentsRes.data) {
-          setRecruitments(recruitmentsRes.data);
+          // recruitmentsAPIのレスポンス形式に対応
+          const recruitmentData = recruitmentsRes.data?.data || recruitmentsRes.data || [];
+          setRecruitments(Array.isArray(recruitmentData) ? recruitmentData : []);
         }
+
+        // 未読メッセージ数を設定
+        const count = unreadRes.data?.data?.count || unreadRes.data?.count || 0;
+        setUnreadCount(count);
       } catch (error: any) {
         console.error('データの取得に失敗しました:', error);
         if (error.response?.status === 401) {
@@ -121,7 +136,11 @@ const DashboardPage = () => {
     },
     {
       key: 'messages',
-      tab: 'メッセージ',
+      tab: (
+        <Badge count={unreadCount} size="small" offset={[8, 0]}>
+          <span>メッセージ</span>
+        </Badge>
+      ),
       icon: <MessageOutlined />
     }
   ];
@@ -227,16 +246,30 @@ const DashboardPage = () => {
             <div className="flex items-center space-x-4">
               <Button 
                 type="primary" 
-                icon={<PlusOutlined />}
+                icon={activeTab === 'messages' ? <MessageOutlined /> : <PlusOutlined />}
                 onClick={() => {
                   if (activeTab === 'projects') {
                     router.push('/portfolio/new');
                   } else if (activeTab === 'recruitments') {
-                    router.push('/recruitments/new');
+                    router.push('/recruitments');
+                  } else if (activeTab === 'tasks') {
+                    router.push('/tasks');
+                  } else if (activeTab === 'messages') {
+                    router.push('/messages');
                   }
                 }}
               >
-                {activeTab === 'projects' ? '新規プロジェクト' : '新規募集'}
+                {activeTab === 'projects' && '新規プロジェクト'}
+                {activeTab === 'recruitments' && '新規募集'}
+                {activeTab === 'tasks' && 'タスク管理'}
+                {activeTab === 'messages' && 'メッセージを見る'}
+              </Button>
+              <Button
+                type="default"
+                icon={<UserOutlined />}
+                onClick={() => router.push('/dashboard/profile')}
+              >
+                プロフィール
               </Button>
               <Button
                 type="primary"
@@ -339,7 +372,7 @@ const DashboardPage = () => {
                   type="primary" 
                   ghost
                   className="action-button"
-                  onClick={() => router.push('/recruitments/new')}
+                  onClick={() => router.push('/recruitments')}
                 >
                   募集を投稿 <span>→</span>
                 </Button>
@@ -362,12 +395,13 @@ const DashboardPage = () => {
                   type="primary" 
                   ghost
                   className="action-button"
-                  onClick={() => setActiveTab('tasks')}
+                  onClick={() => router.push('/tasks')}
                 >
                   タスクを確認 <span>→</span>
                 </Button>
               </div>
             </Card>
+
           </div>
         </div>
       </main>

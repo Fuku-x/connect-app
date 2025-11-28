@@ -78,6 +78,25 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('/', [ProfileController::class, 'update']);
     });
 
+    // タスク管理関連
+    Route::prefix('tasks')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\TaskController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\TaskController::class, 'show']);
+        Route::post('/', [\App\Http\Controllers\Api\TaskController::class, 'store']);
+        Route::put('/{id}', [\App\Http\Controllers\Api\TaskController::class, 'update']);
+        Route::patch('/{id}/status', [\App\Http\Controllers\Api\TaskController::class, 'updateStatus']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\TaskController::class, 'destroy']);
+    });
+
+    // メッセージ関連
+    Route::prefix('messages')->group(function () {
+        Route::get('/conversations', [\App\Http\Controllers\Api\MessageController::class, 'conversations']);
+        Route::get('/conversations/{id}', [\App\Http\Controllers\Api\MessageController::class, 'messages']);
+        Route::post('/send', [\App\Http\Controllers\Api\MessageController::class, 'send']);
+        Route::post('/start', [\App\Http\Controllers\Api\MessageController::class, 'startConversation']);
+        Route::get('/unread-count', [\App\Http\Controllers\Api\MessageController::class, 'unreadCount']);
+    });
+
     // ログアウト
     Route::post('/logout', [LoginController::class, 'logout']);
 });

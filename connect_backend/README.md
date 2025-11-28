@@ -1,120 +1,153 @@
-# Connect App - バックエンド
+# Kobe Connect - バックエンド
 
-## プロジェクト概要
-このリポジトリはConnectアプリケーションのバックエンドAPIサーバーです。Laravelフレームワークを使用して構築されています。
+神戸電子専門学校の学生のためのコミュニケーション・コラボレーションプラットフォームのAPIサーバー
 
-## 環境要件
+## 技術スタック
 
-- PHP 8.1以上
-- Composer 2.0以上
-- MySQL 5.7以上 / PostgreSQL 10.0以上 / SQLite 3.8.8以上 / SQL Server 2017以上
-- Node.js 16.0以上 (フロントエンドアセットのビルドに必要)
+- **フレームワーク**: Laravel 12.x
+- **言語**: PHP 8.2+
+- **データベース**: MySQL / SQLite
+- **認証**: JWT (tymon/jwt-auth)
 
-## セットアップ手順
+## セットアップ
 
-1. リポジトリをクローン
+### 必要条件
+
+- PHP 8.2 以上
+- Composer
+- MySQL または SQLite
+
+### インストール手順
+
+1. **依存関係のインストール**
    ```bash
-   git clone https://github.com/Fuku-x/connect-app.git
-   cd connect-app/connect_backend
-   ```
-
-2. 依存関係のインストール
-   ```bash
+   cd connect_backend
    composer install
    ```
 
-3. 環境設定ファイルの作成
+2. **環境設定ファイルの作成**
    ```bash
    cp .env.example .env
    php artisan key:generate
+   php artisan jwt:secret
    ```
 
-4. データベースの設定
-   `.env`ファイルを編集してデータベース接続情報を設定
+3. **データベースの設定**
+   
+   `.env` ファイルを編集:
    ```env
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
    DB_PORT=3306
    DB_DATABASE=connect_app
    DB_USERNAME=root
-   DB_PASSWORD=
+   DB_PASSWORD=your_password
+   ```
+   
+   または SQLite を使用:
+   ```env
+   DB_CONNECTION=sqlite
+   DB_DATABASE=/absolute/path/to/database.sqlite
    ```
 
-5. データベースマイグレーションの実行
+4. **データベースマイグレーション**
    ```bash
    php artisan migrate
    ```
 
-6. 開発サーバーの起動
+5. **開発サーバーの起動**
    ```bash
    php artisan serve
    ```
+   
+   APIは http://localhost:8000 で利用可能
 
-## 開発
+## API エンドポイント
 
-### テストの実行
-```bash
-php artisan test
-```
+### 認証
+| メソッド | エンドポイント | 説明 |
+|---------|---------------|------|
+| POST | `/api/register` | ユーザー登録 |
+| POST | `/api/login` | ログイン |
+| POST | `/api/logout` | ログアウト |
+| GET | `/api/me` | 現在のユーザー情報 |
 
-### コードスタイルチェック
-```bash
-composer check-style
-```
+### プロフィール
+| メソッド | エンドポイント | 説明 |
+|---------|---------------|------|
+| GET | `/api/profile` | プロフィール取得 |
+| PUT | `/api/profile` | プロフィール更新 |
 
-### コードスタイルの自動修正
-```bash
-composer fix-style
-```
+### ポートフォリオ
+| メソッド | エンドポイント | 説明 |
+|---------|---------------|------|
+| GET | `/api/portfolio` | 自分のポートフォリオ一覧 |
+| POST | `/api/portfolio` | ポートフォリオ作成 |
+| GET | `/api/portfolio/{id}` | ポートフォリオ詳細 |
+| PUT | `/api/portfolio/{id}` | ポートフォリオ更新 |
+| DELETE | `/api/portfolio/{id}` | ポートフォリオ削除 |
+| GET | `/api/public/portfolios` | 公開ポートフォリオ一覧 |
 
-## APIドキュメント
+### メンバー募集
+| メソッド | エンドポイント | 説明 |
+|---------|---------------|------|
+| GET | `/api/recruitments` | 募集一覧 |
+| POST | `/api/recruitments` | 募集作成 |
+| GET | `/api/recruitments/{id}` | 募集詳細 |
+| PUT | `/api/recruitments/{id}` | 募集更新 |
+| DELETE | `/api/recruitments/{id}` | 募集削除 |
 
-APIドキュメントは以下のコマンドで生成できます:
-```bash
-php artisan l5-swagger:generate
-```
+### タスク
+| メソッド | エンドポイント | 説明 |
+|---------|---------------|------|
+| GET | `/api/tasks` | タスク一覧 |
+| POST | `/api/tasks` | タスク作成 |
+| PUT | `/api/tasks/{id}` | タスク更新 |
+| PATCH | `/api/tasks/{id}/status` | ステータス更新 |
+| DELETE | `/api/tasks/{id}` | タスク削除 |
 
-## デプロイ
-
-### 本番環境用の最適化
-```bash
-composer install --optimize-autoloader --no-dev
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
+### メッセージ
+| メソッド | エンドポイント | 説明 |
+|---------|---------------|------|
+| GET | `/api/messages/conversations` | 会話一覧 |
+| GET | `/api/messages/conversations/{id}` | メッセージ取得 |
+| POST | `/api/messages/send` | メッセージ送信 |
+| POST | `/api/messages/start` | 会話開始 |
+| GET | `/api/messages/unread-count` | 未読数取得 |
 
 ## ディレクトリ構成
 
 ```
-app/                    # アプリケーションのコアロジック
-├── Console/           # Artisanコマンド
-├── Exceptions/        # 例外ハンドラ
-├── Http/              # コントローラ、ミドルウェア、フォームリクエスト
-└── Models/            # データモデル
+app/
+├── Http/
+│   └── Controllers/
+│       └── Api/           # APIコントローラー
+│           ├── AuthController.php
+│           ├── PortfolioController.php
+│           ├── RecruitmentController.php
+│           ├── TaskController.php
+│           └── MessageController.php
+└── Models/                # Eloquentモデル
+    ├── User.php
+    ├── Portfolio.php
+    ├── Recruitment.php
+    ├── Task.php
+    ├── Conversation.php
+    └── Message.php
 
-config/                # 設定ファイル
+database/
+└── migrations/            # マイグレーションファイル
 
-database/              # データベース関連
-├── factories/         # テストデータファクトリ
-├── migrations/        # データベースマイグレーション
-└── seeders/           # シーダークラス
-
-routes/                # ルート定義
-├── api.php           # APIルート
-├── console.php        # コンソールコマンドのルート
-└── web.php            # Webルート
-
-tests/                 # テストケース
+routes/
+└── api.php               # APIルート定義
 ```
 
-## コントリビューション
+## テスト
 
-1. 機能ブランチを作成してください (`git checkout -b feature/AmazingFeature`)
-2. 変更をコミットしてください (`git commit -m 'Add some AmazingFeature'`)
-3. ブランチにプッシュしてください (`git push origin feature/AmazingFeature`)
-4. プルリクエストを開いてください
+```bash
+php artisan test
+```
 
 ## ライセンス
 
-[MITライセンス](https://opensource.org/licenses/MIT)の下で公開されています。
+MIT License
