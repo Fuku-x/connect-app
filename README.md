@@ -50,3 +50,14 @@ cp .env.example .env.local
 # .env.localを編集
 npm run dev
 ```
+
+### バックエンド
+```
+cd connect_backend
+composer install
+cp .env.example .env
+# .envを編集
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve
+```
