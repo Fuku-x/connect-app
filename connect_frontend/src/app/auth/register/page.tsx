@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Header from '@/components/Header/Header';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -107,7 +106,16 @@ const RegisterPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-900">
-      <Header />
+      {/* シンプルなヘッダー */}
+      <header className="bg-white shadow-sm dark:bg-zinc-800">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
+              Kobe Connect
+            </Link>
+          </div>
+        </div>
+      </header>
       <div className="flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">

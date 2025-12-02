@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { setAuthToken, getAuthToken } from '@/lib/auth';
-import Header from '@/components/Header/Header';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -12,60 +11,52 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     // メールアドレスのバリデーション
-    const emailRegex = /^[^\s@]+@st\.kobedenshi\.ac\.jp$/;
+    const emailRegex = /^[^\s@]+@st\.kobedenshi\.ac\.jp$/i;
     if (!emailRegex.test(email)) {
       setError('有効な神戸電子のメールアドレス(@st.kobedenshi.ac.jp)を入力してください');
       return;
     }
 
     try {
-      // ログインAPIエンドポイントにリクエストを送信
-      const response = await fetch('http://localhost:8000/api/login', {
+      const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000';
+      
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify({ 
-          email: email.trim(),
-          password: password
-        }),
+        body: JSON.stringify({ email, password }),
       });
 
-      // レスポンスの内容を確認
-      const responseText = await response.text();
-      let data;
-      try {
-        data = responseText ? JSON.parse(responseText) : {};
-      } catch (e) {
-        console.error('Failed to parse response:', responseText);
-        throw new Error('サーバーからの応答の解析に失敗しました');
-      }
+      const data = await response.json();
 
       if (!response.ok) {
+        // バリデーションエラーの詳細を取得
+        if (data.errors) {
+          const errorMessages = Object.values(data.errors).flat().join('\n');
+          throw new Error(errorMessages || data.message || 'ログインに失敗しました');
+        }
         throw new Error(data.message || 'ログインに失敗しました');
       }
 
-      // トークンを保存
       if (!data.access_token) {
-        throw new Error('トークンが含まれていません');
+        throw new Error('認証トークンが取得できませんでした');
       }
       
-      // トークンを保存（ユーティリティ関数を使用）
+      // トークンとユーザー情報を保存
       setAuthToken(data.access_token);
       
-      // ユーザー情報を保存
       if (data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
       }
       
       console.log('Login successful, user:', data.user);
-      console.log('JWT Token:', data.access_token);
       
       // トークンの検証
       const token = getAuthToken();
@@ -83,7 +74,16 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-900">
-      <Header />
+      {/* シンプルなヘッダー */}
+      <header className="bg-white shadow-sm dark:bg-zinc-800">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
+              Kobe Connect
+            </Link>
+          </div>
+        </div>
+      </header>
       <div className="flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">

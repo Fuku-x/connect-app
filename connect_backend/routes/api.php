@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\PortfolioController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,12 @@ Route::post('/refresh-token', [\App\Http\Controllers\Api\AuthController::class, 
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
 
+// 公開ポートフォリオ
+Route::prefix('public/portfolios')->group(function () {
+    Route::get('/', [PortfolioController::class, 'publicIndex']);
+    Route::get('/{portfolio}', [PortfolioController::class, 'publicShow']);
+});
+
 // 認証が必要なルート - JWT ミドルウェアを使用
 Route::middleware(['auth:api'])->group(function () {
     // 現在のユーザー情報を取得
@@ -48,9 +55,12 @@ Route::middleware(['auth:api'])->group(function () {
 
     // ポートフォリオ関連
     Route::prefix('portfolio')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\PortfolioController::class, 'index']);
-        Route::get('/{id}', [\App\Http\Controllers\Api\PortfolioController::class, 'show']);
-        Route::post('/', [\App\Http\Controllers\Api\PortfolioController::class, 'store']);
+        Route::get('/', [PortfolioController::class, 'index']);
+        Route::post('/', [PortfolioController::class, 'store']);
+        Route::put('/{portfolio}', [PortfolioController::class, 'update']);
+        Route::delete('/{portfolio}', [PortfolioController::class, 'destroy']);
+        Route::post('/upload-thumbnail', [PortfolioController::class, 'uploadThumbnail']);
+        Route::post('/upload-gallery', [PortfolioController::class, 'uploadGallery']);
     });
 
     // メンバー募集関連
@@ -66,6 +76,25 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('profile')->group(function () {
         Route::get('/', [ProfileController::class, 'show']);
         Route::put('/', [ProfileController::class, 'update']);
+    });
+
+    // タスク管理関連
+    Route::prefix('tasks')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\TaskController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\TaskController::class, 'show']);
+        Route::post('/', [\App\Http\Controllers\Api\TaskController::class, 'store']);
+        Route::put('/{id}', [\App\Http\Controllers\Api\TaskController::class, 'update']);
+        Route::patch('/{id}/status', [\App\Http\Controllers\Api\TaskController::class, 'updateStatus']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\TaskController::class, 'destroy']);
+    });
+
+    // メッセージ関連
+    Route::prefix('messages')->group(function () {
+        Route::get('/conversations', [\App\Http\Controllers\Api\MessageController::class, 'conversations']);
+        Route::get('/conversations/{id}', [\App\Http\Controllers\Api\MessageController::class, 'messages']);
+        Route::post('/send', [\App\Http\Controllers\Api\MessageController::class, 'send']);
+        Route::post('/start', [\App\Http\Controllers\Api\MessageController::class, 'startConversation']);
+        Route::get('/unread-count', [\App\Http\Controllers\Api\MessageController::class, 'unreadCount']);
     });
 
     // ログアウト
