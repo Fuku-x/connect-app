@@ -52,7 +52,7 @@ npm run dev
 ```
 
 ### バックエンド
-```
+```bash
 cd connect_backend
 composer install
 cp .env.example .env
@@ -60,4 +60,40 @@ cp .env.example .env
 php artisan key:generate
 php artisan migrate --seed
 php artisan serve
+```
+
+## 環境変数
+
+### フロントエンド
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+```
+
+### バックエンド
+```bash
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=kobe_connect
+DB_USERNAME=root
+DB_PASSWORD=
+
+JWT_SECRET=your_jwt_secret
+```
+
+## ディレクトリ構成図
+```bash
+connect-app/
+├── connect_frontend/    # フロントエンド
+│   ├── src/
+│   │   ├── app/         # ページコンポーネント
+│   │   ├── components/  # 共通コンポーネント
+│   │   └── lib/         # ユーティリティ
+│   └── public/          # 静的ファイル
+│
+└── connect_backend/     # バックエンド
+    ├── app/             # アプリケーションロジック
+    ├── config/          # 設定ファイル
+    ├── database/        # マイグレーション・シーダー
+    └── routes/          # APIルート
 ```
